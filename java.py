@@ -31,6 +31,7 @@ import os
 import pickle
 
 from pyjvm.class_path import read_class_path
+from pyjvm.executor import Executor
 from pyjvm.jvmo import JArray
 from pyjvm.vm import vm_factory
 
@@ -61,7 +62,7 @@ def main(args):
     main_class = args.clazz[0]
     class_path = args.cp[0]
     params = args.param
-    use_vm_cache = not args.no_vm_cache
+    use_vm_cache = False
 
     vm = None
     if use_vm_cache:
@@ -102,7 +103,8 @@ def main(args):
     m_args[0] = ref
 
     # run main
-    vm.run_vm(java_class, main_method, m_args)
+    executor = Executor(vm, java_class, main_method, m_args)
+    executor.run_all()
 
     logger.debug("*** VM DONE ***")
 
@@ -140,6 +142,7 @@ def cache_vm(vm):
         logger.debug("VM cached with %i", vm.serialization_id)
     except Exception as exc:
         logger.error("Error caching vm: %s", str(exc))
+
 
 if __name__ == '__main__':
     main(program_args)

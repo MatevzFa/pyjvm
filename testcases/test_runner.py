@@ -60,7 +60,7 @@ def run(vm, klass_name):
     klass = vm.get_class(klass_name)
     main_method = klass.find_method("main", "([Ljava/lang/String;)V")
     m_args = [''] * main_method[1]
-    vm.run_vm(klass, main_method, m_args)
+    vm.initialize_vm(klass, main_method, m_args)
 
 
 print "TestCase1.Begin"
