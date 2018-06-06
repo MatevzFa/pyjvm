@@ -20,6 +20,10 @@ class Executor:
         # self.current_thread = vm.get_next_thread()
 
     def run_all(self):
+        """
+        Executes all threads
+        :return: None
+        """
         while True:
             if not self.step_all_threads(quota=1000):
                 break
@@ -43,8 +47,9 @@ class Executor:
 
     def step_all_threads(self, quota=1):
         """
-        Run a single bytecode from each thread
-        :return true if at least one thread is still alive after exec, false otherwise
+        Run quota bytecodes for every thread
+        :param quota: n of bytecodes (default 1)
+        :return: true if any thread is still alive after exec, false otherwise
         """
         any_alive = False
         for thread in self.vm.threads:
@@ -57,6 +62,11 @@ class Executor:
         return any_alive and self.vm.non_daemons > 0
 
     def kill_thread(self, thread):
+        """
+        Kill the specified thread
+        :param thread: the thread
+        :return: None
+        """
         thread.is_alive = False
         j_thread = self.vm.heap[thread.java_thread[1]]
         assert j_thread is not None
