@@ -49,7 +49,7 @@ parser.add_argument('-novmcache', dest='no_vm_cache',
 parser.add_argument('clazz', nargs=1,
                     help='main class, e.g. some.package.MyClass')
 parser.add_argument('param', nargs='*', help='argument for class')
-program_args = parser.parse_args()
+program_args, unknown = parser.parse_known_args()
 
 
 def main(args):
