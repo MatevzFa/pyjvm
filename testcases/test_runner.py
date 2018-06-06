@@ -33,6 +33,7 @@ logging.disable(logging.INFO)
 
 sys.path.append('../.')
 
+from pyjvm.executor import Executor
 from pyjvm.vm import vm_factory
 
 print
@@ -60,7 +61,8 @@ def run(vm, klass_name):
     klass = vm.get_class(klass_name)
     main_method = klass.find_method("main", "([Ljava/lang/String;)V")
     m_args = [''] * main_method[1]
-    vm.initialize_vm(klass, main_method, m_args)
+    executor = Executor(vm, klass, main_method, m_args)
+    executor.run_all()
 
 
 print "TestCase1.Begin"
