@@ -3,3 +3,5 @@ vm-cache.bin
 rt/rt.jar
 test-output/
 *.log
+
+.idea/
