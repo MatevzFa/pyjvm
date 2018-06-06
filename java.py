@@ -62,7 +62,7 @@ def main(args):
     main_class = args.clazz[0]
     class_path = args.cp[0]
     params = args.param
-    use_vm_cache = False
+    use_vm_cache = not args.no_vm_cache
 
     vm = None
     if use_vm_cache:
