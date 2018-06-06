@@ -55,9 +55,7 @@ program_args, unknown = parser.parse_known_args()
 
 def main(args):
     '''Init VM and run requested java application'''
-    logging.basicConfig(filename='pyjvm.log', filemode='w',
-                        level=logging.DEBUG)
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(filename='pyjvm.log', filemode='w', level=logging.DEBUG)
 
     main_class = args.clazz[0]
     class_path = args.cp[0]
