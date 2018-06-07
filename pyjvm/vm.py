@@ -73,11 +73,12 @@ class VM(object):
         self.perm_gen = {}
         self.heap = {}
         self.heap_next_id = 1
-        #todo clean up self.cache_klass_klass = {}
+        # todo clean up self.cache_klass_klass = {}
         self.global_strings = {}
 
         # Handle for linked list of threads
         self.threads_queue = deque()
+        self.threads = []
         self.non_daemons = 0
 
         self.top_group = None
@@ -150,7 +151,7 @@ class VM(object):
         pvm_thread = Thread(self, t_ref)
         pvm_thread.is_alive = True
         method = tg_klass.find_method("add", "(Ljava/lang/Thread;)V")
-        args = [None]*method[1]
+        args = [None] * method[1]
         args[0] = tg_ref
         args[1] = t_ref
         frame = Frame(pvm_thread, tg_klass, method, args, "system tg init")
@@ -162,12 +163,17 @@ class VM(object):
         self.top_group_ref = tg_ref
         self.top_thread_ref = t_ref
 
-    def run_vm(self, main_klass, method, m_args):
-        '''Run initialized vm with specific method of a class.
+    def initialize_vm(self, main_klass, method, m_args):
+        """
+        Run initialized vm with specific method of a class.
         This is class entered from command line. Method is looked up
         void main(String args[]).
         For more details see methods.txt in docs.
-        '''
+        :param main_klass:
+        :param method:
+        :param m_args:
+        :return:
+        """
         t_klass = self.get_class("java/lang/Thread")
         t = t_klass.get_instance(self)
         t.fields["priority"] = 5
@@ -184,13 +190,16 @@ class VM(object):
 
         self.add_thread(pvm_thread)
         logger.debug("run thread pool")
-        self.run_thread_pool()
+        # self.run_thread_pool()
 
     def get_class(self, class_name):
-        '''Returns initialized class from pool (perm_gen) or loads
+        """
+        Returns initialized class from pool (perm_gen) or loads
         it with class loader (and running static constructor).
         Getting a class might result in loading it's super first.
-        '''
+        :param class_name:
+        :return:
+        """
         if class_name is None:
             return  # this is look up for Object's super, which is  None
         if class_name in self.perm_gen:
@@ -252,7 +261,7 @@ class VM(object):
             return
         pvm_thread = Thread(self, self.top_thread_ref)
         pvm_thread.is_alive = True
-        frame = Frame(pvm_thread, java_class, method, [None]*method[1],
+        frame = Frame(pvm_thread, java_class, method, [None] * method[1],
                       "<clinit:{0}>".format(java_class.this_name))
         pvm_thread.frame_stack.append(frame)
         self.run_thread(pvm_thread)
@@ -323,15 +332,32 @@ class VM(object):
 
     def add_thread(self, thread):
         '''Add py thread to pool'''
+        self.threads.append(thread)
         self.threads_queue.append(thread)
         assert thread.java_thread is not None
         java_thread = self.heap[thread.java_thread[1]]
         if java_thread.fields["daemon"] == 0:
             self.non_daemons += 1
 
+    def get_next_thread(self):
+        """
+        :return: Thread that's next in line to execute
+        """
+        return self.threads_queue.popleft()
+
+    def enqueue_thread(self, thread):
+        """
+        Put a thread back into the queue
+        :param thread: the thread
+        :return None
+        """
+        self.threads_queue.append(thread)
+
     def run_thread_pool(self):
-        '''Run all threads.
-        Threads are run one-by-one according to quota'''
+        """
+        Run all threads.
+        Threads are run one-by-one according to quota
+        """
         while len(self.threads_queue) > 0:
             thread = self.threads_queue.popleft()
             self.run_thread(thread, 100)
@@ -347,10 +373,11 @@ class VM(object):
                     if self.non_daemons == 0:
                         break
             else:
-                self.threads_queue.append(thread)
+                self.enqueue_thread(thread)
 
     def run_thread(self, thread, quota=-1):
-        '''Run single thread according to quota.
+        """
+        Run single thread according to quota.
         Quota is number of byte codes to be executed.
         Quota -1 runs entire thread in exclusive mode.
 
@@ -358,7 +385,7 @@ class VM(object):
         Operation can throw exception.
         Thread may be busy (e.g. monitor is not available).
         Returns from syncronized methods are handled.
-        '''
+        """
         frame_stack = thread.frame_stack
         while len(frame_stack) > 0:
             frame = frame_stack[-1]  # get current
@@ -371,7 +398,7 @@ class VM(object):
 
                 logger.debug("About to execute {2}: op_{0} ({3}) in {1}".format(
                     op_call, frame.id, frame.pc - 1, get_operation_name(op_call)))
-                
+
                 opt = get_operation(op_call)
                 if opt is None:
                     raise Exception("Op ({0}) is not yet supported".format(
@@ -436,7 +463,7 @@ class VM(object):
         ref = self.add_to_heap(ex)
 
         method = ex_klass.find_method("<init>", "()V")
-        m_args = [None]*method[1]
+        m_args = [None] * method[1]
         m_args[0] = ref
 
         pvm_thread = Thread(self, None)
