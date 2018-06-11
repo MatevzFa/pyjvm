@@ -17,6 +17,7 @@
 
 Created for every method execution and placed to thread's stack
 '''
+from pyjvm import bytecode
 
 f_counter = 1  # make it easy to debug
 
@@ -43,3 +44,18 @@ class Frame(object):
         self.cpc = 0
         self.monitor = None
         f_counter += 1
+
+    def get_current_bytecode(self):
+        """
+        :return: string representation of the instruction pointed to by PC
+        """
+        if self.pc < len(self.code):
+            return str(bytecode.get_operation_name(hex(ord(self.code[self.pc]))))
+        else:
+            return "_"
+
+    def __str__(self):
+        # a = ",".join(self.args)
+        a = str(self.args)
+        s = str(self.stack)
+        return "args{} stack{}".format(a, s)

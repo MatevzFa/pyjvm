@@ -19,6 +19,18 @@ class Executor:
 
         # self.current_thread = vm.get_next_thread()
 
+    def get_frame_for_thread(self, thread_idx):
+        """
+
+        :param thread_idx: index of the thread
+        :return: Current frame of the specified thread
+        :rtype: pyjvm.frame.Frame
+        """
+        if len(self.vm.threads[thread_idx].frame_stack) > 0:
+            return self.vm.threads[thread_idx].frame_stack[-1]
+        else:
+            return None
+
     def run_all(self):
         """
         Executes all threads
@@ -28,7 +40,7 @@ class Executor:
             if not self.step_all_threads(quota=1000):
                 break
 
-    def step_thread(self, thread_idx):
+    def step_thread(self, thread_idx, quota=1):
         """
         Run a single bytecode from thread with index thread_idx
         :param thread_idx: index of the thread to exec
@@ -36,7 +48,10 @@ class Executor:
         """
         thread = self.vm.threads[thread_idx]
         if thread.is_alive:
-            self.vm.run_thread(thread, quota=1)
+            frame = self.get_frame_for_thread(thread_idx)
+            op = frame.get_current_bytecode()
+            self.vm.run_thread(thread, quota)
+            print "exec: " + op + " -> " + str(frame)
             if len(thread.frame_stack) == 0:
                 self.kill_thread(thread)
                 return False
@@ -52,9 +67,10 @@ class Executor:
         :return: true if any thread is still alive after exec, false otherwise
         """
         any_alive = False
-        for thread in self.vm.threads:
+        for thread_idx in range(len(self.vm.threads)):
+            thread = self.vm.threads[thread_idx]
             if thread.is_alive:
-                self.vm.run_thread(thread, quota)
+                self.step_thread(thread_idx, quota)
                 if len(thread.frame_stack) == 0:
                     self.kill_thread(thread)
                 else:
