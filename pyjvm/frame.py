@@ -48,7 +48,7 @@ class Frame(object):
 
     def get_current_bytecode(self):
         """
-        :return: string representation of the instruction pointed to by PC
+        :return: string representation of the instruction that is about to execute
         """
         if self.pc < len(self.code):
             return hex(ord(self.code[self.pc])) + " " + str(bytecode.get_operation_name(hex(ord(self.code[self.pc]))))
@@ -56,7 +56,10 @@ class Frame(object):
             return None
 
     def get_current_operands(self):
-
+        """
+        :return: array of operands for the instruction that is about to execute
+        :return:
+        """
         if self.pc < len(self.code):
             fn = bytecode.get_operands(hex(ord(self.code[self.pc])))
             return fn(self)
