@@ -18,6 +18,7 @@
 Created for every method execution and placed to thread's stack
 '''
 from pyjvm import bytecode
+from pyjvm.operands.ops_operands import *
 
 f_counter = 1  # make it easy to debug
 
@@ -50,9 +51,17 @@ class Frame(object):
         :return: string representation of the instruction pointed to by PC
         """
         if self.pc < len(self.code):
-            return str(bytecode.get_operation_name(hex(ord(self.code[self.pc]))))
+            return hex(ord(self.code[self.pc])) + " " + str(bytecode.get_operation_name(hex(ord(self.code[self.pc]))))
         else:
-            return "_"
+            return None
+
+    def get_current_operands(self):
+
+        if self.pc < len(self.code):
+            fn = bytecode.get_operands(hex(ord(self.code[self.pc])))
+            return fn(self)
+        else:
+            return []
 
     def __str__(self):
         # a = ",".join(self.args)

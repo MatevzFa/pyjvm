@@ -102,7 +102,12 @@ def main(args):
 
     # run main
     executor = Executor(vm, java_class, main_method, m_args)
-    executor.run_all()
+
+    running = True
+
+    while running:
+        # a = raw_input()
+        running = executor.step_all_threads()
 
     logger.debug("*** VM DONE ***")
 
