@@ -1,5 +1,6 @@
 BYTECODE = {}
 OPERANDS = {}
+TO_BYTECODE = {}
 
 
 def bytecode(code):
@@ -18,8 +19,20 @@ def operands(code):
     return cl
 
 
+def to_bytecode(code):
+    def cl(func):
+        TO_BYTECODE[hex(code)] = func
+        return func
+
+    return cl
+
+
 def get_operands(code):
     return OPERANDS.get(code)
+
+
+def get_to_bytecode(code):
+    return TO_BYTECODE.get(code)
 
 
 def get_operation(code):
