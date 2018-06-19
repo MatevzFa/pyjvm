@@ -29,7 +29,11 @@ import argparse
 import logging
 import os
 import pickle
+import sys
 
+from PySide2 import QtWidgets
+
+from gui.pyjvmgui import PyJvmGui
 from pyjvm.class_path import read_class_path
 from pyjvm.executor import Executor
 from pyjvm.jvmo import JArray
@@ -103,13 +107,14 @@ def main(args):
     # run main
     executor = Executor(vm, java_class, main_method, m_args)
 
-    running = True
+    executor.step_all_threads(10)
 
-    while running:
-        # a = raw_input()
-        running = executor.step_all_threads()
+    app = QtWidgets.QApplication(sys.argv)
 
-    logger.debug("*** VM DONE ***")
+    gui = PyJvmGui(executor)
+    gui.show()
+
+    sys.exit(app.exec_())
 
 
 def load_cached_vm(serialization_id):

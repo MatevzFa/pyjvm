@@ -1,5 +1,5 @@
 from pyjvm import bytecode as bytecodeutil
-from ops_to_bytecode import *
+
 
 
 class Bytecode:
@@ -12,11 +12,11 @@ class Bytecode:
         """
         self.loc = loc
         self.opcode = opcode
-        self.name = bytecodeutil.get_operation(opcode)
+        self.name = bytecodeutil.get_operation_name(hex(opcode))
         self.operands = operands
 
     def __str__(self):
-        return "{0}: {1} {2}".format(self.loc, self.opcode, str(self.operands))
+        return "{0}\t{1} {2}".format(self.loc, self.name, str(self.operands))
 
     @staticmethod
     def bytecode_list_from_code(code):
