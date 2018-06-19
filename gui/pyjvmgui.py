@@ -1,11 +1,8 @@
 import os
-import sys
 
-from PySide2 import QtWidgets
-from PySide2.QtCore import QUrl, QStringListModel
-from PySide2.QtGui import QGuiApplication
+from PySide2.QtCore import QUrl
 from PySide2.QtQuick import QQuickView
-from PySide2.QtWidgets import QListWidgetItem
+
 
 from gui.bytecodemodel import BytecodeModel
 from gui.abstractions.ops_to_bytecode import *
