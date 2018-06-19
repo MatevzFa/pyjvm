@@ -52,8 +52,7 @@ class Executor:
             op = frame.get_current_bytecode()
             operands = frame.get_current_operands()
             self.vm.run_thread(thread, quota)
-            if thread_idx == 1:
-                print "{0} | {1} {2}".format(thread_idx, op, str(operands))
+            print "{0} | {1} {2}".format(thread_idx, op, str(operands))
             if len(thread.frame_stack) == 0:
                 self.kill_thread(thread)
                 return False

@@ -107,12 +107,11 @@ def main(args):
     # run main
     executor = Executor(vm, java_class, main_method, m_args)
 
-    executor.step_all_threads(10)
-
     app = QtWidgets.QApplication(sys.argv)
 
-    gui = PyJvmGui(executor)
-    gui.show()
+    thread_guis = []
+    for i, thread in enumerate(executor.vm.threads):
+        thread_guis.append(PyJvmGui(executor, i))
 
     sys.exit(app.exec_())
 
