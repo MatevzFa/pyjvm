@@ -6,10 +6,12 @@ import QtQuick.Layouts 1.11
 RowLayout {
     anchors.fill: parent
     spacing: 0
+
     Rectangle {
     	Layout.preferredWidth: parent.width / 2
         Layout.fillHeight: true
     }
+
     Rectangle {
 	Layout.fillWidth: true
         Layout.fillHeight: true
@@ -21,23 +23,22 @@ RowLayout {
             anchors.fill: parent
 
             TableViewColumn {
-            role: "loc"
-            title: "loc"
-            width: 100
+		role: "loc"
+		title: "loc"
+		width: 100
             }
             TableViewColumn {
-            role: "op"
-            title: "Opcode"
-            width: 100
+		role: "op"
+		title: "Opcode"
+		width: 100
             }
-            TableViewColumn {
-            role: "operands"
-            title: "Operands"
-            width: 200
+	    TableViewColumn {
+		role: "operands"
+		title: "Operands"
+		width: 200
             }
 
             model: bytecode
         }
-
     }
 }
