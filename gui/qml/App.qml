@@ -9,6 +9,13 @@ RowLayout {
     anchors.fill: parent
     spacing: 5
 
+    Component.onCompleted: {
+		bytecodeTable.selection.clear()
+		var loc = app.getCurLoc(5)
+		bytecodeTable.selection.select(loc)
+		bytecodeTable.positionViewAtRow(loc, ListView.Center)
+	}
+
     Rectangle {
     	id: col1
 		Layout.preferredWidth: 480
@@ -61,7 +68,6 @@ RowLayout {
 
 			Button {
 				Layout.fillWidth: true
-				id: stepButton
 				text: "Step"
 				onClicked: {
 					app.stepExecutor()
@@ -71,12 +77,27 @@ RowLayout {
 					bytecodeTable.positionViewAtRow(loc, ListView.Center)
 				}
 			}
+			Button {
+				Layout.fillWidth: true
+				text: "Step Out"
+				onClicked: {
+					app.stepOut()
+					bytecodeTable.selection.clear()
+					var loc = app.getCurLoc(5)
+					bytecodeTable.selection.select(loc)
+					bytecodeTable.positionViewAtRow(loc, ListView.Center)
+				}
+			}
+
 
 			Separator {}
 
 			Label {
 				text: "Frame"
 				font.pixelSize: 20
+			}
+			Text {
+				text: frameInfo
 			}
 			Separator {}
 

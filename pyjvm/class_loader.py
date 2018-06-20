@@ -252,7 +252,10 @@ def fields(f):
 
 
 def methods(f):
-    '''Read all methods from .class'''
+    """
+    Read all methods from .class
+    :return Return type is list of tuples: (flag, name, desc, attrs)
+    """
     methods_count = getU2(f)
     data = []
     for i in range(methods_count):

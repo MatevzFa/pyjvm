@@ -65,9 +65,17 @@ class PyJvmGui(QQuickView):
         self.bytecode = BytecodeModel(bytecodes=code_list)
         self.rootContext().setContextProperty("bytecode", self.bytecode)
 
+        self.frame_info = self.executor.get_frame_for_thread(self.thread_idx).desc
+        self.rootContext().setContextProperty("frameInfo", self.frame_info)
+
     @Slot()
     def stepExecutor(self):
         frame_alive = self.executor.step_thread(self.thread_idx)
+        self.show_bytecode()
+
+    @Slot()
+    def stepOut(self):
+        self.executor.step_thread_until_frame_over(self.thread_idx)
         self.show_bytecode()
 
     @Slot(result=int)

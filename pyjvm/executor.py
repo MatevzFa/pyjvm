@@ -63,6 +63,17 @@ class Executor:
         else:
             return False
 
+    def step_thread_until_frame_over(self, thread_idx):
+        # To stop after 10000 instructions
+        n_steps = 100
+
+        while n_steps > 0:
+            alive = self.step_thread(thread_idx)
+            n_steps -= 1
+            if not alive:
+                break
+
+
     def step_all_threads(self, quota=1):
         """
         Run quota bytecodes for every thread
