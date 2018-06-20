@@ -44,7 +44,7 @@ class Executor:
         """
         Run a single bytecode from thread with index thread_idx
         :param thread_idx: index of the thread to exec
-        :return: true if the thread is still alive after exec, false otherwise
+        :return: true if the same frame is still alive after exec, false otherwise
         """
         thread = self.vm.threads[thread_idx]
         if thread.is_alive:
@@ -52,7 +52,9 @@ class Executor:
             op = frame.get_current_bytecode()
             operands = frame.get_current_operands()
             self.vm.run_thread(thread, quota)
-            print "{0} | {1} {2}".format(thread_idx, op, str(operands))
+            # print "{0} | {1} {2}".format(thread_idx, op, str(operands))
+            if frame == self.get_frame_for_thread(thread_idx):
+                return True
             if len(thread.frame_stack) == 0:
                 self.kill_thread(thread)
                 return False

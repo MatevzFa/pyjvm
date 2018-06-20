@@ -1,4 +1,6 @@
 import os
+import pprint
+import random
 
 from PySide2.QtCore import QUrl, QSize, Slot
 from PySide2.QtQuick import QQuickView
@@ -42,7 +44,6 @@ class PyJvmGui(QQuickView):
         self.executor = executor
         self.show_bytecode()
 
-        self.rootContext().setContextProperty("bytecode", self.bytecode)
         self.rootContext().setContextProperty("app", self)
 
         qml_file_path = os.path.join(os.path.dirname(__file__), "qml/App.qml")
@@ -57,8 +58,18 @@ class PyJvmGui(QQuickView):
 
     def show_bytecode(self):
         code_list = Bytecode.bytecode_list_from_code(self.executor.get_frame_for_thread(self.thread_idx).code)
+        self.loc_to_idx = {}
+        for i, code in enumerate(code_list):
+            self.loc_to_idx[code.loc] = i
+        # pprint.pprint(self.loc_to_idx)
         self.bytecode = BytecodeModel(bytecodes=code_list)
+        self.rootContext().setContextProperty("bytecode", self.bytecode)
 
     @Slot()
     def stepExecutor(self):
-        self.executor.step_thread(self.thread_idx)
+        frame_alive = self.executor.step_thread(self.thread_idx)
+        self.show_bytecode()
+
+    @Slot(result=int)
+    def getCurLoc(self):
+        return self.loc_to_idx.get(self.executor.get_frame_for_thread(self.thread_idx).pc)

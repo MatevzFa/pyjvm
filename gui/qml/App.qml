@@ -1,4 +1,5 @@
 import QtQuick 2.6
+import QtQuick.Controls 1.4
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.11
 import QtQuick.Controls.Styles 1.4
@@ -9,10 +10,44 @@ RowLayout {
     spacing: 5
 
     Rectangle {
+    	id: col1
 		Layout.preferredWidth: 480
 		Layout.fillHeight: true
 
-		Bytecode {}
+		TableView {
+			id: bytecodeTable
+			width: 400
+			selectionMode: SelectionMode.NoSelection
+			anchors.fill: parent
+
+			TableViewColumn {
+				role: "loc"
+				title: "loc"
+				width: 100
+				movable: false
+				resizable: false
+			}
+			TableViewColumn {
+				role: "op"
+				title: "Opcode"
+				delegate: Text {
+					text: styleData.value
+					font.family: "monospace"
+				}
+				width: 150
+				movable: false
+				resizable: false
+			}
+			TableViewColumn {
+				role: "operands"
+				title: "Operands"
+				width: 200
+				movable: false
+				resizable: false
+			}
+
+			model: bytecode
+		}
 	}
 
     Rectangle {
@@ -28,7 +63,13 @@ RowLayout {
 				Layout.fillWidth: true
 				id: stepButton
 				text: "Step"
-				onClicked: app.stepExecutor()
+				onClicked: {
+					app.stepExecutor()
+					bytecodeTable.selection.clear()
+					var loc = app.getCurLoc(5)
+					bytecodeTable.selection.select(loc)
+					bytecodeTable.positionViewAtRow(loc, ListView.Center)
+				}
 			}
 
 			Separator {}
