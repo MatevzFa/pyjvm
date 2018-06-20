@@ -5,6 +5,10 @@ test-output/
 *.log
 *.qmlc
 
+# pyinstaller
+build/
+dist/
+*.spec
 
 # IDE settings
 .idea/
