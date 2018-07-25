@@ -17,8 +17,6 @@ class Executor:
 
         vm.initialize_vm(java_class, main_method, m_args)
 
-        # self.current_thread = vm.get_next_thread()
-
     def get_frame_for_thread(self, thread_idx):
         """
 
@@ -64,8 +62,11 @@ class Executor:
             return False
 
     def step_thread_until_frame_over(self, thread_idx):
-        # To stop after 10000 instructions
-
+        """
+        Keep executing until this frame is popped.
+        :param thread_idx: index of the thread we want to do 'step out' for
+        :return: void
+        """
         frame_stack_depth = len(self.vm.threads[thread_idx].frame_stack)
 
         if frame_stack_depth <= 1:

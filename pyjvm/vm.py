@@ -13,9 +13,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''Java Virtual Machine.
+"""
+Java Virtual Machine.
 Initialization, threads, frame management.
-'''
+"""
 
 import logging
 from collections import deque
@@ -24,26 +25,30 @@ from pyjvm.bytecode import get_operation, get_operation_name
 from pyjvm.class_loader import class_loader
 from pyjvm.class_path import read_class_path
 from pyjvm.frame import Frame
-from pyjvm.jvmo import array_class_factory
 from pyjvm.jvmo import JArray
 from pyjvm.jvmo import JavaClass
-from pyjvm.thread import Thread
+from pyjvm.jvmo import array_class_factory
 from pyjvm.thread import SkipThreadCycle
-
+from pyjvm.thread import Thread
 from pyjvm.throw import JavaException
-
 from pyjvm.vmo import VM_OBJECTS
 
-from pyjvm.ops.ops_names import ops_name
+"""
+These imports are required so that ops are initialized.
+DO NOT REMOVE (there should be 5 + 5 + 2 = 14)
+"""
+from pyjvm.ops.ops_names import *
 from pyjvm.ops.ops_arrays import *
 from pyjvm.ops.ops_calc import *
 from pyjvm.ops.ops_cond import *
 from pyjvm.ops.ops_convert import *
+
 from pyjvm.ops.ops_fields import *
 from pyjvm.ops.ops_invokespecial import *
 from pyjvm.ops.ops_invokestatic import *
 from pyjvm.ops.ops_invokevirtual import *
 from pyjvm.ops.ops_invokeinterface import *
+
 from pyjvm.ops.ops_misc import *
 from pyjvm.ops.ops_ret import *
 from pyjvm.ops.ops_setget import *

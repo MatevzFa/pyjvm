@@ -1,34 +1,32 @@
 import os
-import pprint
-import random
 
 from PySide2.QtCore import QUrl, QSize, Slot
 from PySide2.QtQuick import QQuickView
 
-from gui.bytecodemodel import BytecodeModel
-
-from gui.abstractions.bytecode import Bytecode
-
-# DO NOT REMOVE
 from gui.abstractions.ops_to_bytecode import *
+from gui.bytecodemodel import BytecodeModel
 from gui.opstackmodel import OperandStackModel
-from pyjvm.ops.ops_names import ops_name
+
+"""
+These imports are required so that ops are initialized.
+DO NOT REMOVE (there should be 5 + 5 + 2 = 14)
+"""
+from pyjvm.ops.ops_names import *
 from pyjvm.ops.ops_arrays import *
 from pyjvm.ops.ops_calc import *
 from pyjvm.ops.ops_cond import *
 from pyjvm.ops.ops_convert import *
+
 from pyjvm.ops.ops_fields import *
 from pyjvm.ops.ops_invokespecial import *
 from pyjvm.ops.ops_invokestatic import *
 from pyjvm.ops.ops_invokevirtual import *
 from pyjvm.ops.ops_invokeinterface import *
+
 from pyjvm.ops.ops_misc import *
 from pyjvm.ops.ops_ret import *
 from pyjvm.ops.ops_setget import *
 from pyjvm.ops.ops_shift import *
-
-
-# /DO NOT REMOVE
 
 
 class PyJvmGui(QQuickView):
@@ -49,8 +47,6 @@ class PyJvmGui(QQuickView):
         qml_file_path = os.path.join(os.path.dirname(__file__), "qml/App.qml")
         self.setSource(QUrl(os.path.abspath(qml_file_path)))
 
-        # Step button
-
         self.show()
 
     def set_executor(self, executor):
@@ -61,7 +57,7 @@ class PyJvmGui(QQuickView):
         self.loc_to_idx = {}
         for i, code in enumerate(code_list):
             self.loc_to_idx[code.loc] = i
-        # pprint.pprint(self.loc_to_idx)
+
         self.bytecode = BytecodeModel(bytecodes=code_list)
         self.rootContext().setContextProperty("bytecode", self.bytecode)
 

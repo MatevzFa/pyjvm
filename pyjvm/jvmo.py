@@ -122,7 +122,7 @@ class JavaObject(object):
         for name in jc.member_fields:
             tp = jc.member_fields[name]
             if tp[0] == 'L':
-                #vm.get_class(tp[1:-1])
+                # vm.get_class(tp[1:-1])
                 pass
             self.fields[name] = default_for_type(jc.member_fields[name])
         self.fill_fields(jc.super_class, vm)
@@ -140,6 +140,7 @@ class JArray(object):
 
     Lives in heap and has corresponding java_class
     '''
+
     def __init__(self, jc, vm):
         self.java_class = jc
         self.fields = {}

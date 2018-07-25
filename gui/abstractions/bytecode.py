@@ -1,7 +1,6 @@
 from pyjvm import bytecode as bytecodeutil
 
 
-
 class Bytecode:
 
     def __init__(self, loc, opcode, operands):
