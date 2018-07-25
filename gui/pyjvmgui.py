@@ -6,12 +6,12 @@ from PySide2.QtCore import QUrl, QSize, Slot
 from PySide2.QtQuick import QQuickView
 
 from gui.bytecodemodel import BytecodeModel
-from gui.abstractions.ops_to_bytecode import *
 
 from gui.abstractions.bytecode import Bytecode
 
 # DO NOT REMOVE
 from gui.abstractions.ops_to_bytecode import *
+from gui.opstackmodel import OperandStackModel
 from pyjvm.ops.ops_names import ops_name
 from pyjvm.ops.ops_arrays import *
 from pyjvm.ops.ops_calc import *
@@ -67,6 +67,11 @@ class PyJvmGui(QQuickView):
 
         self.frame_info = self.executor.get_frame_for_thread(self.thread_idx).desc
         self.rootContext().setContextProperty("frameInfo", self.frame_info)
+
+        op_stack = self.executor.get_frame_for_thread(self.thread_idx).stack
+
+        self.operand_stack = OperandStackModel(operands=op_stack)
+        self.rootContext().setContextProperty("operandStack", self.operand_stack)
 
     @Slot()
     def stepExecutor(self):

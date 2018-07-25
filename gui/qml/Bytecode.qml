@@ -35,5 +35,5 @@ TableView {
 		resizable: false
 	}
 
-	model: bytecode
+	model: parent.bytecode
 }

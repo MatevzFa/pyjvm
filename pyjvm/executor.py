@@ -65,14 +65,21 @@ class Executor:
 
     def step_thread_until_frame_over(self, thread_idx):
         # To stop after 10000 instructions
-        n_steps = 100
 
-        while n_steps > 0:
+        frame_stack_depth = len(self.vm.threads[thread_idx].frame_stack)
+
+        if frame_stack_depth <= 1:
+            from java import logger
+            logger.warn("Trying to step out from frame depth " + str(frame_stack_depth))
+            return
+
+        next_stack_depth = frame_stack_depth
+
+        while frame_stack_depth <= next_stack_depth:
             alive = self.step_thread(thread_idx)
-            n_steps -= 1
             if not alive:
                 break
-
+            next_stack_depth = len(self.vm.threads[thread_idx].frame_stack)
 
     def step_all_threads(self, quota=1):
         """

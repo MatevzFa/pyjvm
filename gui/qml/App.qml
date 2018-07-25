@@ -11,9 +11,11 @@ RowLayout {
 
     Component.onCompleted: {
 		bytecodeTable.selection.clear()
-		var loc = app.getCurLoc(5)
-		bytecodeTable.selection.select(loc)
-		bytecodeTable.positionViewAtRow(loc, ListView.Center)
+		var loc = app.getCurLoc()
+		if (loc < bytecodeTable.rowCount) {
+			bytecodeTable.selection.select(loc)
+			bytecodeTable.positionViewAtRow(loc, ListView.Center)
+		}
 	}
 
     Rectangle {
@@ -67,25 +69,29 @@ RowLayout {
 			spacing: 10
 
 			Button {
-				Layout.fillWidth: true
+//				Layout.fillWidth: true
 				text: "Step"
 				onClicked: {
 					app.stepExecutor()
 					bytecodeTable.selection.clear()
-					var loc = app.getCurLoc(5)
-					bytecodeTable.selection.select(loc)
-					bytecodeTable.positionViewAtRow(loc, ListView.Center)
+					var loc = app.getCurLoc()
+					if (loc < bytecodeTable.rowCount) {
+						bytecodeTable.selection.select(loc)
+						bytecodeTable.positionViewAtRow(loc, ListView.Center)
+					}
 				}
 			}
 			Button {
-				Layout.fillWidth: true
+//				Layout.fillWidth: true
 				text: "Step Out"
 				onClicked: {
 					app.stepOut()
 					bytecodeTable.selection.clear()
-					var loc = app.getCurLoc(5)
-					bytecodeTable.selection.select(loc)
-					bytecodeTable.positionViewAtRow(loc, ListView.Center)
+					var loc = app.getCurLoc()
+					if (loc < bytecodeTable.rowCount) {
+						bytecodeTable.selection.select(loc)
+						bytecodeTable.positionViewAtRow(loc, ListView.Center)
+					}
 				}
 			}
 
@@ -105,11 +111,20 @@ RowLayout {
 				text: "Operand stack"
 				font.pixelSize: 20
 			}
-			OperandStack {
-				Layout.fillWidth: true
-			}
-			Separator {}
-		}
+			TableView {
+				id: opStackTable
+				width: 400
+				selectionMode: SelectionMode.NoSelection
+				TableViewColumn {
+					role: "operands"
+					title: "Operands"
+					width: 200
+					movable: false
+					resizable: false
+				}
 
+				model: operandStack
+			}
+		}
     }
 }
