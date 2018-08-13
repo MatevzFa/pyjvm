@@ -6,6 +6,11 @@ import QtQuick.Controls.Styles 1.4
 
 
 RowLayout {
+
+	onWidthChanged:{
+		resizeHack.text = "_"
+		resizeHack.text = ""
+	}
     anchors.fill: parent
     spacing: 5
 
@@ -20,19 +25,18 @@ RowLayout {
 
     Rectangle {
     	id: col1
-		Layout.preferredWidth: 480
+		Layout.preferredWidth: 500
 		Layout.fillHeight: true
 
 		TableView {
 			id: bytecodeTable
-			width: 400
 			selectionMode: SelectionMode.NoSelection
 			anchors.fill: parent
 
 			TableViewColumn {
 				role: "loc"
 				title: "loc"
-				width: 100
+				width: 50
 				movable: false
 				resizable: false
 			}
@@ -50,7 +54,7 @@ RowLayout {
 			TableViewColumn {
 				role: "operands"
 				title: "Operands"
-				width: 200
+				width: 250
 				movable: false
 				resizable: false
 			}
@@ -62,14 +66,17 @@ RowLayout {
     Rectangle {
     	id: col2
 		Layout.fillWidth: true
-		Layout.fillHeight: true
+		Layout.alignment: Qt.AlignTop
+		Layout.fillHeight: false
+		color: "blue"
 
 		ColumnLayout {
 
+			anchors.fill: parent
 			spacing: 10
 
 			Button {
-//				Layout.fillWidth: true
+				Layout.fillWidth: true
 				text: "Step"
 				onClicked: {
 					app.stepExecutor()
@@ -82,7 +89,7 @@ RowLayout {
 				}
 			}
 			Button {
-//				Layout.fillWidth: true
+				Layout.fillWidth: true
 				text: "Step Out"
 				onClicked: {
 					app.stepOut()
@@ -98,22 +105,27 @@ RowLayout {
 
 			Separator {}
 
+			// Frame Information
 			Label {
 				text: "Frame"
 				font.pixelSize: 20
 			}
 			Text {
+				id: idFrameInfo
 				text: frameInfo
+				Layout.fillWidth: true
+				wrapMode: Text.Wrap
 			}
 			Separator {}
 
+			// Operand stack
 			Label {
 				text: "Operand stack"
 				font.pixelSize: 20
 			}
 			TableView {
 				id: opStackTable
-				width: 400
+				Layout.fillWidth: true
 				selectionMode: SelectionMode.NoSelection
 				TableViewColumn {
 					role: "operands"
@@ -124,6 +136,39 @@ RowLayout {
 				}
 
 				model: operandStack
+			}
+
+			// Locals Stack
+			Label {
+				text: "Locals & Args"
+				font.pixelSize: 20
+			}
+			TableView {
+				id: localsTable
+				Layout.fillWidth: true
+				selectionMode: SelectionMode.NoSelection
+				TableViewColumn {
+					role: "idx"
+					title: "Index"
+					width: 50
+					movable: false
+					resizable: false
+				}
+				TableViewColumn {
+					role: "value"
+					title: "Value"
+					movable: false
+					resizable: false
+				}
+
+				model: locals
+			}
+
+			Text {
+				id: resizeHack
+				text: ""
+				Layout.fillWidth: true
+				wrapMode: Text.Wrap
 			}
 		}
     }

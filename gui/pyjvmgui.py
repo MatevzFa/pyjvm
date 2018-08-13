@@ -5,6 +5,7 @@ from PySide2.QtQuick import QQuickView
 
 from gui.abstractions.ops_to_bytecode import *
 from gui.bytecodemodel import BytecodeModel
+from gui.localsmodel import LocalsModel
 from gui.opstackmodel import OperandStackModel
 
 """
@@ -35,7 +36,7 @@ class PyJvmGui(QQuickView):
         super(PyJvmGui, self).__init__(parent)
 
         self.setResizeMode(QQuickView.SizeViewToRootObject)
-        self.setMinimumSize(QSize(800, 500))
+        self.setMinimumSize(QSize(800, 600))
         self.setTitle("PyJVM - Thread " + str(thread_idx + 1))
 
         self.thread_idx = thread_idx
@@ -44,8 +45,8 @@ class PyJvmGui(QQuickView):
 
         self.rootContext().setContextProperty("app", self)
 
-        qml_file_path = os.path.join(os.path.dirname(__file__), "qml/App.qml")
-        self.setSource(QUrl(os.path.abspath(qml_file_path)))
+        qml_file_path = os.path.join(os.path.dirname(__file__), "qml", "App.qml")
+        self.setSource(QUrl.fromLocalFile(os.path.abspath(qml_file_path)))
 
         self.show()
 
@@ -53,21 +54,29 @@ class PyJvmGui(QQuickView):
         self.executor = executor
 
     def show_bytecode(self):
-        code_list = Bytecode.bytecode_list_from_code(self.executor.get_frame_for_thread(self.thread_idx).code)
+        # Bytecode
+        bytecode = Bytecode.bytecode_list_from_code(self.executor.get_frame_for_thread(self.thread_idx).code)
         self.loc_to_idx = {}
-        for i, code in enumerate(code_list):
+        for i, code in enumerate(bytecode):
             self.loc_to_idx[code.loc] = i
 
-        self.bytecode = BytecodeModel(bytecodes=code_list)
-        self.rootContext().setContextProperty("bytecode", self.bytecode)
+        self.bytecode_model = BytecodeModel(bytecodes=bytecode)
+        self.rootContext().setContextProperty("bytecode", self.bytecode_model)
 
+        # Frame Information
         self.frame_info = self.executor.get_frame_for_thread(self.thread_idx).desc
         self.rootContext().setContextProperty("frameInfo", self.frame_info)
 
+        # Operand Stack
         op_stack = self.executor.get_frame_for_thread(self.thread_idx).stack
 
-        self.operand_stack = OperandStackModel(operands=op_stack)
-        self.rootContext().setContextProperty("operandStack", self.operand_stack)
+        self.operand_stack_model = OperandStackModel(operands=op_stack)
+        self.rootContext().setContextProperty("operandStack", self.operand_stack_model)
+
+        # Locals & Args table
+        locals = self.executor.get_frame_for_thread(self.thread_idx).args
+        self.locals_model = LocalsModel(locals=locals)
+        self.rootContext().setContextProperty("locals", self.locals_model)
 
     @Slot()
     def stepExecutor(self):
