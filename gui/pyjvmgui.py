@@ -1,6 +1,6 @@
 import os
 
-from PySide2.QtCore import QUrl, QSize, Slot
+from PySide2.QtCore import QSize, QUrl, Slot
 from PySide2.QtQuick import QQuickView
 
 from gui.abstractions.ops_to_bytecode import *
@@ -10,7 +10,7 @@ from gui.opstackmodel import OperandStackModel
 
 """
 These imports are required so that ops are initialized.
-DO NOT REMOVE (there should be 5 + 5 + 2 = 14)
+DO NOT REMOVE (there should be 5 + 5 + 4 = 14)
 """
 from pyjvm.ops.ops_names import *
 from pyjvm.ops.ops_arrays import *
@@ -49,9 +49,6 @@ class PyJvmGui(QQuickView):
         self.setSource(QUrl.fromLocalFile(os.path.abspath(qml_file_path)))
 
         self.show()
-
-    def set_executor(self, executor):
-        self.executor = executor
 
     def show_bytecode(self):
         # Bytecode
