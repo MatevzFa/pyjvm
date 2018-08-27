@@ -116,6 +116,7 @@ class VM(object):
 
         logger.debug("Run PrintStream init")
         self.run_thread(thread)  # Run exclusive thread
+        # <--thread added to the VM at this point
         system_class.static_fields["out"][1] = ps_ref
 
         system_class.static_fields["in"][1] = \
