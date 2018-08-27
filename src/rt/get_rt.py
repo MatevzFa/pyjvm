@@ -16,34 +16,40 @@
 '''rt.jar downloader.
 For systems without java installed.
 '''
-
+import os
 import urllib2
 
 # Dropbox content, this is rt.jar from JDK7
 url = 'https://dl.dropboxusercontent.com/s/9wiumk3xvigqndi/rt.jar'
 
-print "rt.jar from Java 7 is being downloaded"
 
-u = urllib2.urlopen(url)
-f = open('rt.jar', 'wb')
-meta_info = u.info()
-file_size = int(meta_info.getheaders("Content-Length")[0])
-print "Total: %s mb" % (file_size/1024/1024)
+def download(rt_dir):
+    print "rt.jar from Java 7 is being downloaded"
 
-downloaded = 0
-block = 8192
-print " [" + ("="*50) + "]"
-while True:
-    data = u.read(block)
-    if not data:
-        break
+    u = urllib2.urlopen(url)
+    f = open(os.path.join(rt_dir, 'rt.jar'), 'wb')
+    meta_info = u.info()
+    file_size = int(meta_info.getheaders("Content-Length")[0])
+    print "Total: %s mb" % (file_size / 1024 / 1024)
 
-    downloaded += len(data)
-    f.write(data)
-    completed = downloaded * 100.0 / file_size
-    arrow = "=" * int(completed/2.0)
-    status = r"[%s] %3.0f%%" % (arrow, completed)
-    status = status + chr(8)*(len(status)+1)
-    print status,
+    downloaded = 0
+    block = 8192
+    print " [" + ("=" * 50) + "]"
+    while True:
+        data = u.read(block)
+        if not data:
+            break
 
-f.close()
+        downloaded += len(data)
+        f.write(data)
+        completed = downloaded * 100.0 / file_size
+        arrow = "=" * int(completed / 2.0)
+        status = r"[%s] %3.0f%%" % (arrow, completed)
+        status = status + chr(8) * (len(status) + 1)
+        print status,
+
+    f.close()
+
+
+if __name__ == "__main__":
+    download(os.path.abspath(os.path.dirname(__file__)))

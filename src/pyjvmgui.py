@@ -15,9 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """pyjvm starting point
 
-Run as 'python java.py -h' to get help info.
+Run as 'python pyjvmgui.py -h' to get help info.
 Most common use case:
-    python java.py -cp CLASSPATH main.class.Name
+    python pyjvmgui.py -cp CLASSPATH main.class.Name
 
 JAVA_HOME must be set (in case you have jdk7 at you computer) or run
 get_rt.py in rt folder to download dependencies.
@@ -57,14 +57,14 @@ parser.add_argument('param', nargs='*', help='argument for class')
 program_args, unknown = parser.parse_known_args()
 
 
-def main(args):
+def main():
     '''Init VM and run requested java application'''
     logging.basicConfig(filename='pyjvm.log', filemode='w', level=logging.DEBUG)
 
-    main_class = args.clazz[0]
-    class_path = args.cp[0]
-    params = args.param
-    use_vm_cache = not args.no_vm_cache
+    main_class = program_args.clazz[0]
+    class_path = program_args.cp[0]
+    params = program_args.param
+    use_vm_cache = not program_args.no_vm_cache
 
     vm = None
     if use_vm_cache:
@@ -152,4 +152,4 @@ def cache_vm(vm):
 
 
 if __name__ == '__main__':
-    main(program_args)
+    main()

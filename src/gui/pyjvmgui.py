@@ -45,7 +45,16 @@ class PyJvmGui(QQuickView):
 
         self.rootContext().setContextProperty("app", self)
 
-        qml_file_path = os.path.join(os.path.dirname(__file__), "qml", "App.qml")
+        qml_file_path_project = os.path.join(os.path.dirname(__file__), "qml", "App.qml")
+        qml_file_path_home = os.path.join(os.path.expanduser("~"), ".pyjvmgui", "App.qml")
+
+        if os.path.isfile(qml_file_path_project):
+            qml_file_path = qml_file_path_project
+        elif os.path.isfile(qml_file_path_home):
+            qml_file_path = qml_file_path_home
+        else:
+            raise Exception("App.qml not found")
+
         self.setSource(QUrl.fromLocalFile(os.path.abspath(qml_file_path)))
 
         self.show()

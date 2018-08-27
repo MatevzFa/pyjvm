@@ -70,7 +70,7 @@ class Executor:
         frame_stack_depth = len(self.vm.threads[thread_idx].frame_stack)
 
         if frame_stack_depth <= 1:
-            from java import logger
+            from pyjvmgui import logger
             logger.warn("Trying to step out from frame depth " + str(frame_stack_depth))
             return
 

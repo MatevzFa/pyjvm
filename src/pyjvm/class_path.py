@@ -40,8 +40,15 @@ def read_class_path(class_path):
 
     # first check local rt.jar
     local_path = os.path.dirname(os.path.realpath(__file__))
-    RT_JAR = os.path.join(local_path, "../rt/rt.jar")
-    if not os.path.isfile(RT_JAR):
+
+    RT_JAR_PROJECT = os.path.join(local_path, "..", "rt", "rt.jar")
+    RT_JAR_HOME = os.path.join(os.path.expanduser("~"), '.pyjvmgui', 'rt.jar')
+
+    if os.path.isfile(RT_JAR_PROJECT):
+        RT_JAR = RT_JAR_PROJECT
+    elif os.path.isfile(RT_JAR_HOME):
+        RT_JAR = RT_JAR_HOME
+    else:
         JAVA_HOME = os.environ.get('JAVA_HOME')
         if JAVA_HOME is None:
             raise Exception("JAVA_HOME is not set")
