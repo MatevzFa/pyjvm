@@ -38,7 +38,7 @@ class ThreadExecutor:
         :type quota: int
         :return: the ThreadState
         """
-        return self.thread.vm.run_thread(self.thread, quota=quota)
+        return self.thread.vm.run_thread_my(self.thread, quota=quota)
 
     def step_thread_until_frame_over(self):
         """

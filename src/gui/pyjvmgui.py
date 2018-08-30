@@ -105,14 +105,14 @@ class PyJvmGui(QQuickView):
     @Slot()
     def stepExecutor(self):
         state = self.executor.step_thread()
-        if state == ThreadState.DONE:
+        if state == ThreadState.DONE or (state == ThreadState.BLOCKED and len(self.executor.thread.vm.threads) == 1):
             self.close()
         self.show_bytecode()
 
     @Slot()
     def stepOut(self):
         state = self.executor.step_thread_until_frame_over()
-        if state == ThreadState.DONE:
+        if state == ThreadState.DONE or (state == ThreadState.BLOCKED and len(self.executor.thread.vm.threads) == 1):
             self.close()
         self.show_bytecode()
 

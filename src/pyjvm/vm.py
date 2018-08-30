@@ -344,7 +344,9 @@ class VM(object):
         self.threads.append(thread)
         self.threads_queue.append(thread)
         assert thread.java_thread is not None
+
         java_thread = self.heap[thread.java_thread[1]]
+
         if java_thread.fields["daemon"] == 0:
             self.non_daemons += 1
 
@@ -400,7 +402,7 @@ class VM(object):
     #         else:
     #             self.enqueue_thread(thread)
 
-    def run_thread(self, thread, quota=-1):
+    def run_thread_my(self, thread, quota=-1):
         """
         Run single thread according to quota.
         Quota is number of byte codes to be executed.
@@ -488,16 +490,91 @@ class VM(object):
             self.remove_thread(thread)
 
             thread.is_alive = False
-            if thread.java_thread is not None:
-                j_thread = self.heap[thread.java_thread[1]]
-                assert j_thread is not None
-                for o in j_thread.waiting_list:
-                    o.is_notified = True
-                java_thread = self.heap[thread.java_thread[1]]
-                if java_thread.fields["daemon"] == 0 and self.non_daemons > 0:
-                    self.non_daemons -= 1
+            assert thread.java_thread is not None
+            j_thread = self.heap[thread.java_thread[1]]
+            assert j_thread is not None
+            for o in j_thread.waiting_list:
+                o.is_notified = True
+            java_thread = self.heap[thread.java_thread[1]]
+            if java_thread.fields["daemon"] == 0 and self.non_daemons > 0:
+                self.non_daemons -= 1
 
         return thread_state
+
+    def run_thread(self, thread, quota=-1):
+        '''Run single thread according to quota.
+        Quota is number of byte codes to be executed.
+        Quota -1 runs entire thread in exclusive mode.
+        For each byte code specific operation function is called.
+        Operation can throw exception.
+        Thread may be busy (e.g. monitor is not available).
+        Returns from syncronized methods are handled.
+        '''
+        frame_stack = thread.frame_stack
+        while len(frame_stack) > 0:
+            frame = frame_stack[-1]  # get current
+            if frame.pc < len(frame.code):
+                op = frame.code[frame.pc]
+                frame.cpc = frame.pc
+                frame.pc += 1
+                # Make function name to be called
+                op_call = hex(ord(op))
+
+                logger.debug("About to execute {2}: op_{0} ({3}) in {1}".format(
+                    op_call, frame.id, frame.pc - 1, get_operation_name(op_call)))
+
+                opt = get_operation(op_call)
+                if opt is None:
+                    raise Exception("Op ({0}) is not yet supported".format(
+                        op_call))
+                try:
+                    try:
+                        opt(frame)
+                        logger.debug("Stack:" + str(frame.stack))
+                    except SkipThreadCycle:
+                        # Thread is busy, call the same operation later
+                        frame.pc = frame.cpc
+                        break
+                except JavaException as jexc:
+                    # Exception handling
+                    ref = jexc.ref
+                    exc = self.heap[ref[1]]
+                    handled = False
+                    while not handled:
+                        for (start_pc, end_pc, handler_pc, catch_type,
+                             type_name) in frame.method[3]:
+                            if start_pc <= frame.cpc < end_pc and \
+                                    self.object_of_klass(exc, type_name):
+                                frame.pc = handler_pc
+                                frame.stack.append(ref)
+                                handled = True
+                                break
+                        if handled:
+                            break
+                        frame_stack.pop()
+                        if len(frame_stack) == 0:
+                            raise
+                        frame = frame_stack[-1]
+
+            else:
+                # Frame is done
+                frame_stack.pop()
+                if frame.monitor is not None:
+                    assert frame.monitor.fields["@monitor"] == frame.thread
+                    frame.monitor.fields["@monitor_count"] -= 1
+                    if frame.monitor.fields["@monitor_count"] == 0:
+                        del frame.monitor.fields["@monitor"]
+                        del frame.monitor.fields["@monitor_count"]
+                        frame.monitor = None
+                # handle possible return VALUE
+                if frame.has_result:
+                    if len(frame_stack) > 0:
+                        frame_stack[-1].stack.append(frame.ret)
+
+            if quota != -1:
+                quota -= 1
+                if quota == 0:
+                    break
 
     def raise_exception(self, frame, name):
         '''Util method to raise an exception based on name.
