@@ -73,6 +73,8 @@ class ThreadExecutor:
             else:
                 raise Exception("Unknown frame state")
 
+    def step_thread_until_done_or_blocked(self):
+        return self.thread.vm.run_thread_my(self.thread, quota=-1)
 
     # def step_all_threads(self, quota=1):
     #     """

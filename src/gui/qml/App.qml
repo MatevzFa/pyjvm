@@ -101,6 +101,19 @@ RowLayout {
 					}
 				}
 			}
+			Button {
+				Layout.fillWidth: true
+				text: "Step until thread done/blocked"
+				onClicked: {
+					app.stepUntilDoneOrBlocked()
+					bytecodeTable.selection.clear()
+					var loc = app.getCurLoc()
+					if (loc < bytecodeTable.rowCount) {
+						bytecodeTable.selection.select(loc)
+						bytecodeTable.positionViewAtRow(loc, ListView.Center)
+					}
+				}
+			}
 
 
 			Separator {}

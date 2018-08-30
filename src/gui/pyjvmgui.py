@@ -116,6 +116,13 @@ class PyJvmGui(QQuickView):
             self.close()
         self.show_bytecode()
 
+    @Slot()
+    def stepUntilDoneOrBlocked(self):
+        state = self.executor.step_thread_until_done_or_blocked()
+        if state == ThreadState.DONE or (state == ThreadState.BLOCKED and len(self.executor.thread.vm.threads) == 1):
+            self.close()
+        self.show_bytecode()
+
     @Slot(result=int)
     def getCurLoc(self):
         frame = self.executor.get_frame_for_thread()
