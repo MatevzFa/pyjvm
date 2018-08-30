@@ -44,6 +44,11 @@ class Thread(object):
             obj = _vm.heap[_java_thread[1]]
             obj.fields["@pvm_thread"] = self
 
+        print "LOG: Creating thread"
+
+    def __del__(self):
+        print "LOG: Deleting thread"
+
 
 class SkipThreadCycle(Exception):
     '''Thread may skip his execution quota in case when a monitor

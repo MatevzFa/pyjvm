@@ -7,6 +7,7 @@ from gui.abstractions.ops_to_bytecode import *
 from gui.bytecodemodel import BytecodeModel
 from gui.localsmodel import LocalsModel
 from gui.opstackmodel import OperandStackModel
+from pyjvm.thread_state import ThreadState
 
 """
 These imports are required so that ops are initialized.
@@ -31,6 +32,7 @@ from pyjvm.ops.ops_shift import *
 
 
 class PyJvmGui(QQuickView):
+    THREAD_GUIS = []
 
     def __init__(self, executor, thread_idx, parent=None):
         super(PyJvmGui, self).__init__(parent)
@@ -61,39 +63,63 @@ class PyJvmGui(QQuickView):
 
     def show_bytecode(self):
         # Bytecode
-        bytecode = Bytecode.bytecode_list_from_code(self.executor.get_frame_for_thread(self.thread_idx).code)
-        self.loc_to_idx = {}
-        for i, code in enumerate(bytecode):
-            self.loc_to_idx[code.loc] = i
+        frame = self.executor.get_frame_for_thread()
+        if frame != None:
+            bytecode = Bytecode.bytecode_list_from_code(frame.code)
+            self.loc_to_idx = {}
+            for i, code in enumerate(bytecode):
+                self.loc_to_idx[code.loc] = i
+
+        else:
+            # Native method
+            bytecode = []
 
         self.bytecode_model = BytecodeModel(bytecodes=bytecode)
         self.rootContext().setContextProperty("bytecode", self.bytecode_model)
 
         # Frame Information
-        self.frame_info = self.executor.get_frame_for_thread(self.thread_idx).desc
-        self.rootContext().setContextProperty("frameInfo", self.frame_info)
+        if frame != None:
+            self.frame_info = frame.desc
+            self.rootContext().setContextProperty("frameInfo", self.frame_info)
+        else:
+            self.rootContext().setContextProperty("frameInfo", "Native method")
 
         # Operand Stack
-        op_stack = self.executor.get_frame_for_thread(self.thread_idx).stack
+        if frame != None:
+            op_stack = frame.stack
+        else:
+            op_stack = []
 
         self.operand_stack_model = OperandStackModel(operands=op_stack)
         self.rootContext().setContextProperty("operandStack", self.operand_stack_model)
 
         # Locals & Args table
-        locals = self.executor.get_frame_for_thread(self.thread_idx).args
+        if frame != None:
+            locals = frame.args
+        else:
+            locals = []
+
         self.locals_model = LocalsModel(locals=locals)
         self.rootContext().setContextProperty("locals", self.locals_model)
 
     @Slot()
     def stepExecutor(self):
-        frame_alive = self.executor.step_thread(self.thread_idx)
+        state = self.executor.step_thread()
+        if state == ThreadState.DONE:
+            self.close()
         self.show_bytecode()
 
     @Slot()
     def stepOut(self):
-        self.executor.step_thread_until_frame_over(self.thread_idx)
+        state = self.executor.step_thread_until_frame_over()
+        if state == ThreadState.DONE:
+            self.close()
         self.show_bytecode()
 
     @Slot(result=int)
     def getCurLoc(self):
-        return self.loc_to_idx.get(self.executor.get_frame_for_thread(self.thread_idx).pc)
+        frame = self.executor.get_frame_for_thread()
+        if frame != None:
+            return self.loc_to_idx.get(self.executor.get_frame_for_thread().pc)
+        else:
+            return -1

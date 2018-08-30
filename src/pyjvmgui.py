@@ -35,7 +35,7 @@ from PySide2 import QtWidgets
 
 from gui.pyjvmgui import PyJvmGui
 from pyjvm.class_path import read_class_path
-from pyjvm.executor import Executor
+from pyjvm.threadexecutor import ThreadExecutor
 from pyjvm.jvmo import JArray
 from pyjvm.vm import vm_factory
 
@@ -58,6 +58,8 @@ program_args, unknown = parser.parse_known_args()
 
 
 def main():
+    app = QtWidgets.QApplication(sys.argv)
+
     '''Init VM and run requested java application'''
     logging.basicConfig(filename='pyjvm.log', filemode='w', level=logging.DEBUG)
 
@@ -105,21 +107,14 @@ def main():
     m_args[0] = ref
 
     # run main
-    executor = Executor(vm, java_class, main_method, m_args)
-
-    app = QtWidgets.QApplication(sys.argv)
-
-    thread_guis = []
-    for i, thread in enumerate(executor.vm.threads):
-        thread_guis.append(PyJvmGui(executor, i))
+    vm.initialize_vm(java_class, main_method, m_args)
 
     sys.exit(app.exec_())
 
 
 def load_cached_vm(serialization_id):
     '''Load from serialized file'''
-    path = os.path.dirname(os.path.realpath(__file__))
-    path = os.path.join(path, "vm-cache.bin")
+    path = os.path.join(os.path.expanduser("~"), ".pyjvmgui", "vm-cache.bin")
     if os.path.isfile(path):
         cache_file = open(path, "r")
         vm = pickle.load(cache_file)
@@ -141,8 +136,7 @@ def load_cached_vm(serialization_id):
 def cache_vm(vm):
     '''Serialize vm to speed up startup time'''
     try:
-        path = os.path.dirname(os.path.realpath(__file__))
-        path = os.path.join(path, "vm-cache.bin")
+        path = os.path.join(os.path.expanduser("~"), ".pyjvmgui", "vm-cache.bin")
         cache_file = open(path, "w")
         pickle.dump(vm, cache_file)
         cache_file.close()

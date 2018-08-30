@@ -21,15 +21,15 @@ Initialization, threads, frame management.
 import logging
 from collections import deque
 
+from gui.pyjvmgui import PyJvmGui
 from pyjvm.bytecode import get_operation, get_operation_name
 from pyjvm.class_loader import class_loader
 from pyjvm.class_path import read_class_path
 from pyjvm.frame import Frame
-from pyjvm.jvmo import JArray
-from pyjvm.jvmo import JavaClass
-from pyjvm.jvmo import array_class_factory
-from pyjvm.thread import SkipThreadCycle
-from pyjvm.thread import Thread
+from pyjvm.jvmo import JArray, JavaClass, array_class_factory
+from pyjvm.thread import SkipThreadCycle, Thread
+from pyjvm.thread_state import ThreadState
+from pyjvm.threadexecutor import ThreadExecutor
 from pyjvm.throw import JavaException
 from pyjvm.vmo import VM_OBJECTS
 
@@ -73,6 +73,9 @@ class VM(object):
 
     def __init__(self, _class_path="."):
         logger.debug("Creating VM")
+
+        # GUIs
+        self.thread_guis = []
 
         # Major memory structures
         self.perm_gen = {}
@@ -345,6 +348,22 @@ class VM(object):
         if java_thread.fields["daemon"] == 0:
             self.non_daemons += 1
 
+        self.thread_guis.append(PyJvmGui(ThreadExecutor(thread), len(self.threads) - 1))
+
+    def remove_thread(self, thread):
+
+        print "Remove1: " + str(len(self.threads))
+
+        if thread in self.threads:
+            self.threads.remove(thread)
+
+        if thread in self.threads_queue:
+            self.threads_queue.remove(thread)
+
+        print "Remove2: " + str(len(self.threads))
+
+        print "Nondemons: " + str(self.non_daemons)
+
     def get_next_thread(self):
         """
         :return: Thread that's next in line to execute
@@ -359,27 +378,27 @@ class VM(object):
         """
         self.threads_queue.append(thread)
 
-    def run_thread_pool(self):
-        """
-        Run all threads.
-        Threads are run one-by-one according to quota
-        """
-        while len(self.threads_queue) > 0:
-            thread = self.threads_queue.popleft()
-            self.run_thread(thread, 100)
-            if len(thread.frame_stack) == 0:
-                thread.is_alive = False
-                j_thread = self.heap[thread.java_thread[1]]
-                assert j_thread is not None
-                for o in j_thread.waiting_list:
-                    o.is_notified = True
-                java_thread = self.heap[thread.java_thread[1]]
-                if java_thread.fields["daemon"] == 0:
-                    self.non_daemons -= 1
-                    if self.non_daemons == 0:
-                        break
-            else:
-                self.enqueue_thread(thread)
+    # def run_thread_pool(self):
+    #     """
+    #     Run all threads.
+    #     Threads are run one-by-one according to quota
+    #     """
+    #     while len(self.threads_queue) > 0:
+    #         thread = self.threads_queue.popleft()
+    #         self.run_thread(thread, 100)
+    #         if len(thread.frame_stack) == 0:
+    #             thread.is_alive = False
+    #             j_thread = self.heap[thread.java_thread[1]]
+    #             assert j_thread is not None
+    #             for o in j_thread.waiting_list:
+    #                 o.is_notified = True
+    #             java_thread = self.heap[thread.java_thread[1]]
+    #             if java_thread.fields["daemon"] == 0:
+    #                 self.non_daemons -= 1
+    #                 if self.non_daemons == 0:
+    #                     break
+    #         else:
+    #             self.enqueue_thread(thread)
 
     def run_thread(self, thread, quota=-1):
         """
@@ -391,7 +410,11 @@ class VM(object):
         Operation can throw exception.
         Thread may be busy (e.g. monitor is not available).
         Returns from syncronized methods are handled.
+        :return True if current thread is done after exec, false otherwise
         """
+
+        thread_state = ThreadState.RUNNING
+
         frame_stack = thread.frame_stack
         while len(frame_stack) > 0:
             frame = frame_stack[-1]  # get current
@@ -416,6 +439,7 @@ class VM(object):
                     except SkipThreadCycle:
                         # Thread is busy, call the same operation later
                         frame.pc = frame.cpc
+                        thread_state = ThreadState.BLOCKED
                         break
                 except JavaException as jexc:
                     # Exception handling
@@ -457,6 +481,23 @@ class VM(object):
                 quota -= 1
                 if quota == 0:
                     break
+
+        if len(thread.frame_stack) == 0:
+            thread_state = ThreadState.DONE
+
+            self.remove_thread(thread)
+
+            thread.is_alive = False
+            if thread.java_thread is not None:
+                j_thread = self.heap[thread.java_thread[1]]
+                assert j_thread is not None
+                for o in j_thread.waiting_list:
+                    o.is_notified = True
+                java_thread = self.heap[thread.java_thread[1]]
+                if java_thread.fields["daemon"] == 0 and self.non_daemons > 0:
+                    self.non_daemons -= 1
+
+        return thread_state
 
     def raise_exception(self, frame, name):
         '''Util method to raise an exception based on name.
