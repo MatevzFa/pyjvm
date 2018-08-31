@@ -74,9 +74,6 @@ class VM(object):
     def __init__(self, _class_path="."):
         logger.debug("Creating VM")
 
-        # GUIs
-        self.thread_guis = []
-
         # Major memory structures
         self.perm_gen = {}
         self.heap = {}
@@ -350,21 +347,15 @@ class VM(object):
         if java_thread.fields["daemon"] == 0:
             self.non_daemons += 1
 
-        self.thread_guis.append(PyJvmGui(ThreadExecutor(thread), len(self.threads) - 1))
+        PyJvmGui.THREAD_GUIS.append(PyJvmGui(ThreadExecutor(thread), len(PyJvmGui.THREAD_GUIS)))
 
     def remove_thread(self, thread):
-
-        print "Remove1: " + str(len(self.threads))
 
         if thread in self.threads:
             self.threads.remove(thread)
 
         if thread in self.threads_queue:
             self.threads_queue.remove(thread)
-
-        print "Remove2: " + str(len(self.threads))
-
-        print "Nondemons: " + str(self.non_daemons)
 
     def get_next_thread(self):
         """
