@@ -40,7 +40,7 @@ PYJVMGUI_HOME = os.path.join(os.path.expanduser("~"), '.pyjvmgui')
 
 setup(
     name='pyjvmgui',
-    version='1.3.0',
+    version='1.3.1',
     url='https://github.com/MatevzFa/pyjvm',
     license='GPL-3.0',
     author='matevz',
