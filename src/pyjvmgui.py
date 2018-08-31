@@ -30,6 +30,8 @@ import logging
 import os
 import pickle
 import sys
+import urllib2
+import zipfile
 
 from PySide2 import QtWidgets
 
@@ -56,12 +58,19 @@ parser.add_argument('clazz', nargs=1,
 parser.add_argument('param', nargs='*', help='argument for class')
 program_args, unknown = parser.parse_known_args()
 
+PYJVMGUI_HOME = os.path.join(os.path.expanduser("~"), ".pyjvmgui")
+
 
 def main():
+    if not os.path.exists(PYJVMGUI_HOME):
+        os.makedirs(PYJVMGUI_HOME)
+
+    download_rt()
+
     app = QtWidgets.QApplication(sys.argv)
 
     '''Init VM and run requested java application'''
-    logging.basicConfig(filename='pyjvm.log', filemode='w', level=logging.DEBUG)
+    logging.basicConfig(filename=os.path.join(PYJVMGUI_HOME, 'pyjvm.log'), filemode='w', level=logging.DEBUG)
 
     main_class = program_args.clazz[0]
     class_path = program_args.cp[0]
@@ -117,7 +126,7 @@ def main():
 
 def load_cached_vm(serialization_id):
     '''Load from serialized file'''
-    path = os.path.join(os.path.expanduser("~"), ".pyjvmgui", "vm-cache.bin")
+    path = os.path.join(PYJVMGUI_HOME, "vm-cache.bin")
     if os.path.isfile(path):
         cache_file = open(path, "r")
         vm = pickle.load(cache_file)
@@ -125,6 +134,7 @@ def load_cached_vm(serialization_id):
         if hasattr(vm, 'serialization_id'):
             if vm.serialization_id == serialization_id:
                 logger.debug("VM is loaded from cache")
+                print "WARNING: Using cached VM ({0}). Use flag -novmcache to ignore cached VMs.".format(path)
                 return vm
             else:
                 logger.debug("Cached vm has different sid: %i",
@@ -139,13 +149,60 @@ def load_cached_vm(serialization_id):
 def cache_vm(vm):
     '''Serialize vm to speed up startup time'''
     try:
-        path = os.path.join(os.path.expanduser("~"), ".pyjvmgui", "vm-cache.bin")
+        path = os.path.join(PYJVMGUI_HOME, "vm-cache.bin")
         cache_file = open(path, "w")
         pickle.dump(vm, cache_file)
         cache_file.close()
         logger.debug("VM cached with %i", vm.serialization_id)
     except Exception as exc:
         logger.error("Error caching vm: %s", str(exc))
+
+
+def download_rt():
+    rt_file_path = os.path.join(PYJVMGUI_HOME, 'rt.jar')
+
+    rt_url = urllib2.urlopen('https://matevzfa.github.io/static/pyjvm/rt.jar')
+
+    if os.path.isfile(rt_file_path):
+        rt_file = open(rt_file_path, 'r+b')
+        local_file_size = os.path.getsize(rt_file_path)
+    else:
+        rt_file = open(rt_file_path, 'wb')
+        local_file_size = 0
+
+    meta_info = rt_url.info()
+    remote_file_size = int(meta_info.getheaders("Content-Length")[0])
+
+    if local_file_size == remote_file_size and zipfile.is_zipfile(rt_file_path):
+        return
+
+    print "rt.jar from Java 7 is being downloaded to '{0}'".format(rt_file_path)
+
+    print "Total: %s mb" % (remote_file_size / 1024 / 1024)
+
+    progress_width = 50
+
+    downloaded = 0
+    block = 8192
+    while True:
+        data = rt_url.read(block)
+        if not data:
+            break
+
+        downloaded += len(data)
+        rt_file.write(data)
+        completed = float(downloaded) / float(remote_file_size)
+
+        arrow_len = int(progress_width * completed)
+
+        arrow = "=" * arrow_len
+        padding = " " * (progress_width - arrow_len)
+
+        status = r"[%s%s] %3.0f%%" % (arrow, padding, completed * 100)
+        status = status + chr(8) * (len(status) + 1)
+        print status,
+
+    rt_file.close()
 
 
 if __name__ == '__main__':

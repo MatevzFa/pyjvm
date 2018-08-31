@@ -11,17 +11,15 @@ this_directory = path.abspath(path.dirname(__file__))
 srcdir = path.join(this_directory, "src/")
 sys_path.insert(0, srcdir)
 
-import rt.get_rt as get_rt
-
 
 def post_install():
     rt_path = os.path.join(os.path.expanduser("~"), '.pyjvmgui')
     try:
         os.makedirs(rt_path)
+        print "Created directory '{0}'".format(rt_path)
     except OSError as e:
         if e.errno != errno.EEXIST:
             pass
-    get_rt.download(rt_path)
 
 
 class DevelopWithRt(develop):
