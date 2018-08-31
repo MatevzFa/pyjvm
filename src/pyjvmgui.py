@@ -71,12 +71,15 @@ def main():
     vm = None
     if use_vm_cache:
         vm = load_cached_vm(SERIALIZATION_ID)
+
     if vm is None:
         vm = vm_factory(class_path)
         vm.serialization_id = SERIALIZATION_ID
         if use_vm_cache:
             cache_vm(vm)
     else:
+        for thread in vm.threads:
+            PyJvmGui.THREAD_GUIS.append(PyJvmGui(ThreadExecutor(thread), len(PyJvmGui.THREAD_GUIS)))
         vm.class_path = read_class_path(class_path)
 
     # lookup starter class & main method
