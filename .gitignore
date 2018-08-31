@@ -1,6 +1,13 @@
-vm-cache.bin
+# Cached VMs
+**/vm-cache.bin
+
+# rt.jar
+**/rt.jar
+
+# setup.py files
+**/pyjvmgui.egg-info
+
 *.pyc
-rt/rt.jar
 test-output/
 *.log
 *.qmlc
