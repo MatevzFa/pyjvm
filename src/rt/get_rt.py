@@ -20,11 +20,11 @@ import os
 import urllib2
 
 # Dropbox content, this is rt.jar from JDK7
-url = 'https://dl.dropboxusercontent.com/s/9wiumk3xvigqndi/rt.jar'
+url = 'https://matevzfa.github.io/static/pyjvm/rt.jar'
 
 
 def download(rt_dir):
-    print "rt.jar from Java 7 is being downloaded"
+    print "rt.jar from Java 7 is being downloaded to '{0}'".format(rt_dir)
 
     u = urllib2.urlopen(url)
     f = open(os.path.join(rt_dir, 'rt.jar'), 'wb')
