@@ -35,11 +35,22 @@ class PyJvmGui(QQuickView):
     THREAD_GUIS = []
 
     def __init__(self, executor, thread_idx, parent=None):
+        """
+
+        :param executor: pyjvm.threadexecutor.ThreadExecutor
+        :type executor: pyjvm.threadexecutor.ThreadExecutor
+        :param thread_idx:
+        :type thread_idx: int
+        """
         super(PyJvmGui, self).__init__(parent)
 
         self.setResizeMode(QQuickView.SizeViewToRootObject)
         self.setMinimumSize(QSize(800, 600))
-        self.setTitle("PyJVM - Thread " + str(thread_idx + 1))
+
+        self.setTitle("PyJVM - Thread {0} {1}".format(
+            str(thread_idx + 1),
+            "(daemon)" if executor.is_daemon() == 1 else ""
+        ))
 
         self.thread_idx = thread_idx
         self.executor = executor

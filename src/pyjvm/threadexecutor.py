@@ -22,6 +22,11 @@ class ThreadExecutor:
         else:
             return None
 
+    def is_daemon(self):
+        vm = self.thread.vm
+        java_thread = vm.heap[self.thread.java_thread[1]]
+        return java_thread.fields["daemon"] == 1
+
     # def run_all(self):
     #     """
     #     Executes all threads
