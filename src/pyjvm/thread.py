@@ -21,6 +21,8 @@ class Thread(object):
     See threads.txt in documentation for details.
     '''
 
+    N_THREADS = 0
+
     def __init__(self, _vm, _java_thread):
         '''Init pyjvm thread
         _vm reference to current vm
@@ -43,6 +45,8 @@ class Thread(object):
         if _java_thread is not None:
             obj = _vm.heap[_java_thread[1]]
             obj.fields["@pvm_thread"] = self
+
+        Thread.N_THREADS += 1
 
 
 class SkipThreadCycle(Exception):
