@@ -15,7 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from pyjvm.bytecode import to_bytecode
-from gui.abstractions.bytecode import Bytecode
+from pyjvm_gui.abstractions.bytecode import Bytecode
 import logging
 import struct
 

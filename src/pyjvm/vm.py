@@ -21,7 +21,7 @@ Initialization, threads, frame management.
 import logging
 from collections import deque
 
-from gui.pyjvmgui import PyJvmGui
+from pyjvm_gui.pyjvmgui import PyJvmGui
 from pyjvm.bytecode import get_operation, get_operation_name
 from pyjvm.class_loader import class_loader
 from pyjvm.class_path import read_class_path

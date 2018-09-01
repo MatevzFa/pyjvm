@@ -50,8 +50,8 @@ setup(
 
     data_files=[
         (PYJVMGUI_HOME, [
-            os.path.join('src', 'gui', 'qml', 'App.qml'),
-            os.path.join('src', 'gui', 'qml', 'Separator.qml')
+            os.path.join('src', 'pyjvm_gui', 'qml', 'App.qml'),
+            os.path.join('src', 'pyjvm_gui', 'qml', 'Separator.qml')
         ])
     ],
 

@@ -19,10 +19,10 @@ import os
 from PySide2.QtCore import QSize, QUrl, Slot
 from PySide2.QtQuick import QQuickView
 
-from gui.abstractions.ops_to_bytecode import *
-from gui.bytecodemodel import BytecodeModel
-from gui.localsmodel import LocalsModel
-from gui.opstackmodel import OperandStackModel
+from pyjvm_gui.abstractions.ops_to_bytecode import *
+from pyjvm_gui.bytecodemodel import BytecodeModel
+from pyjvm_gui.localsmodel import LocalsModel
+from pyjvm_gui.opstackmodel import OperandStackModel
 from pyjvm.thread_state import ThreadState
 
 """

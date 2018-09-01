@@ -35,7 +35,7 @@ import zipfile
 
 from PySide2 import QtWidgets
 
-from gui.pyjvmgui import PyJvmGui
+from pyjvm_gui.pyjvmgui import PyJvmGui
 from pyjvm.class_path import read_class_path
 from pyjvm.threadexecutor import ThreadExecutor
 from pyjvm.jvmo import JArray

@@ -18,11 +18,11 @@ import fileinput
 
 CSV_DELIM = "\t"
 
-out_file = open("gui/abstractions/ops_to_bytecode.py", "w")
+out_file = open("pyjvm_gui/abstractions/ops_to_bytecode.py", "w")
 
 out_file.write("""
 from pyjvm.bytecode import to_bytecode
-from gui.abstractions.bytecode import Bytecode
+from pyjvm_gui.abstractions.bytecode import Bytecode
 import logging
 import struct
 
