@@ -36,7 +36,7 @@ class InstallWithRt(install):
 
 setup(
     name='pyjvmgui',
-    version='1.3.4',
+    version='1.3.5',
     url='https://github.com/MatevzFa/pyjvm',
     license='GPL-3.0',
     author='matevz',
