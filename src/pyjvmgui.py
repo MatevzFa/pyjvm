@@ -40,6 +40,7 @@ from pyjvm.class_path import read_class_path
 from pyjvm.threadexecutor import ThreadExecutor
 from pyjvm.jvmo import JArray
 from pyjvm.vm import vm_factory
+from pyjvm_util.globals import PYJVMGUI_HOME, VM_CACHE_PATH, RT_JAR_PATH
 
 SERIALIZATION_ID = 2  # inc for each VM init process update
 
@@ -53,12 +54,13 @@ parser.add_argument('-cp', nargs=1, default='.',
 parser.add_argument('-novmcache', dest='no_vm_cache',
                     action='store_const', const=True, default=False,
                     help='do not use vm caching(longer init time)')
+parser.add_argument('-cleancache', dest='clean_cache',
+                    action='store_const', const=True, default=False,
+                    help='remove current cache (reinit the VM)')
 parser.add_argument('clazz', nargs=1,
                     help='main class, e.g. some.package.MyClass')
 parser.add_argument('param', nargs='*', help='argument for class')
 program_args, unknown = parser.parse_known_args()
-
-PYJVMGUI_HOME = os.path.join(os.path.expanduser("~"), ".pyjvmgui")
 
 
 def main():
@@ -76,6 +78,10 @@ def main():
     class_path = program_args.cp[0]
     params = program_args.param
     use_vm_cache = not program_args.no_vm_cache
+
+    if program_args.clean_cache and os.path.isfile(VM_CACHE_PATH):
+        print "WARNING: Cleaning vm-cache.bin (-cleancache)"
+        os.remove(VM_CACHE_PATH)
 
     vm = None
     if use_vm_cache:
@@ -126,15 +132,15 @@ def main():
 
 def load_cached_vm(serialization_id):
     '''Load from serialized file'''
-    path = os.path.join(PYJVMGUI_HOME, "vm-cache.bin")
-    if os.path.isfile(path):
-        cache_file = open(path, "r")
+    if os.path.isfile(VM_CACHE_PATH):
+        cache_file = open(VM_CACHE_PATH, "r")
         vm = pickle.load(cache_file)
         cache_file.close()
         if hasattr(vm, 'serialization_id'):
             if vm.serialization_id == serialization_id:
                 logger.debug("VM is loaded from cache")
-                print "WARNING: Using cached VM ({0}). Use flag -novmcache to ignore cached VMs.".format(path)
+                print "WARNING: Using cached VM ({0}). Use flag -novmcache to ignore cached VMs or -cleancache to reinit the VM.".format(
+                    VM_CACHE_PATH)
                 return vm
             else:
                 logger.debug("Cached vm has different sid: %i",
@@ -149,8 +155,7 @@ def load_cached_vm(serialization_id):
 def cache_vm(vm):
     '''Serialize vm to speed up startup time'''
     try:
-        path = os.path.join(PYJVMGUI_HOME, "vm-cache.bin")
-        cache_file = open(path, "w")
+        cache_file = open(VM_CACHE_PATH, "w")
         pickle.dump(vm, cache_file)
         cache_file.close()
         logger.debug("VM cached with %i", vm.serialization_id)
@@ -159,24 +164,23 @@ def cache_vm(vm):
 
 
 def download_rt():
-    rt_file_path = os.path.join(PYJVMGUI_HOME, 'rt.jar')
 
     rt_url = urllib2.urlopen('https://matevzfa.github.io/static/pyjvm/rt.jar')
 
-    if os.path.isfile(rt_file_path):
-        rt_file = open(rt_file_path, 'r+b')
-        local_file_size = os.path.getsize(rt_file_path)
+    if os.path.isfile(RT_JAR_PATH):
+        rt_file = open(RT_JAR_PATH, 'r+b')
+        local_file_size = os.path.getsize(RT_JAR_PATH)
     else:
-        rt_file = open(rt_file_path, 'wb')
+        rt_file = open(RT_JAR_PATH, 'wb')
         local_file_size = 0
 
     meta_info = rt_url.info()
     remote_file_size = int(meta_info.getheaders("Content-Length")[0])
 
-    if local_file_size == remote_file_size and zipfile.is_zipfile(rt_file_path):
+    if local_file_size == remote_file_size and zipfile.is_zipfile(RT_JAR_PATH):
         return
 
-    print "rt.jar from Java 7 is being downloaded to '{0}'".format(rt_file_path)
+    print "rt.jar from Java 7 is being downloaded to '{0}'".format(RT_JAR_PATH)
 
     print "Total: %s mb" % (remote_file_size / 1024 / 1024)
 

@@ -25,6 +25,8 @@ See START.txt for details
 import os
 import zipfile
 
+from pyjvm_util.globals import RT_JAR_PATH
+
 
 def read_class_path(class_path):
     '''Cache content of all jars.
@@ -38,33 +40,13 @@ def read_class_path(class_path):
     # content of rt.jar
     rt = {}
 
-    # first check local rt.jar
-    local_path = os.path.dirname(os.path.realpath(__file__))
+    if not os.path.isfile(RT_JAR_PATH):
+        raise Exception("rt.jar not found")
 
-    RT_JAR_PROJECT = os.path.join(local_path, "..", "rt", "rt.jar")
-    RT_JAR_HOME = os.path.join(os.path.expanduser("~"), '.pyjvmgui', 'rt.jar')
+    if not zipfile.is_zipfile(RT_JAR_PATH):
+        raise Exception("rt.jar is not a zip: %s" % RT_JAR_PATH)
 
-    if os.path.isfile(RT_JAR_PROJECT):
-        RT_JAR = RT_JAR_PROJECT
-    elif os.path.isfile(RT_JAR_HOME):
-        RT_JAR = RT_JAR_HOME
-    else:
-        JAVA_HOME = os.environ.get('JAVA_HOME')
-        if JAVA_HOME is None:
-            raise Exception("JAVA_HOME is not set")
-        if not os.path.isdir(JAVA_HOME):
-            raise Exception("JAVA_HOME must be a folder: %s" % JAVA_HOME)
-
-        RT_JAR = os.path.join(JAVA_HOME, "lib/rt.jar")
-        if not os.path.exists(RT_JAR) or os.path.isdir(RT_JAR):
-            RT_JAR = os.path.join(JAVA_HOME, "jre/lib/rt.jar")
-            if not os.path.exists(RT_JAR) or os.path.isdir(RT_JAR):
-                raise Exception("rt.jar not found")
-
-    if not zipfile.is_zipfile(RT_JAR):
-        raise Exception("rt.jar is not a zip: %s" % RT_JAR)
-
-    read_from_jar(RT_JAR, rt)
+    read_from_jar(RT_JAR_PATH, rt)
 
     current = os.getcwd()
 

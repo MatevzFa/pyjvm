@@ -3,6 +3,7 @@ import os
 from os import path
 from sys import path as sys_path
 
+from pyjvm_util.globals import PYJVMGUI_HOME
 from setuptools import find_packages, setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
@@ -13,10 +14,9 @@ sys_path.insert(0, srcdir)
 
 
 def post_install():
-    rt_path = os.path.join(os.path.expanduser("~"), '.pyjvmgui')
     try:
-        os.makedirs(rt_path)
-        print "Created directory '{0}'".format(rt_path)
+        os.makedirs(PYJVMGUI_HOME)
+        print "Created directory '{0}'".format(PYJVMGUI_HOME)
     except OSError as e:
         if e.errno != errno.EEXIST:
             pass
@@ -33,8 +33,6 @@ class InstallWithRt(install):
         install.run(self)
         post_install()
 
-
-PYJVMGUI_HOME = os.path.join(os.path.expanduser("~"), '.pyjvmgui')
 
 setup(
     name='pyjvmgui',
