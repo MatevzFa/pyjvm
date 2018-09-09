@@ -1,8 +1,7 @@
-PyJVM
-=====
-Java 7 virtual machine implemented in pure python
+# `pyjvmgui`
 
-**Check START.md for jump-start** and docs folder for details
+## Based on [PyJVM](https://github.com/andrewromanenco/pyjvm)
+Java 7 virtual machine implemented in pure python
 
 - GPL
 - Requires python 2.7
@@ -13,11 +12,30 @@ Java 7 virtual machine implemented in pure python
 > andrew@romanenco.com
 > https://twitter.com/andrewromanenco
 
+## Installation
+
+**Requires Python 2 (hence `pip2`).**
+
+You can install `pyjvmgui` from the [PyPI](https://pypi.org/project/pyjvmgui/).
+
+```
+pip2 install pyjvmgui
+```
+
+When upgrading, it's advised to add `--no-deps` flag. Otherwise, the [PySide2](###PySide2) dependency might be downloaded again.
+
+```
+pip2 install pyjvmgui --upgrade --no-deps
+```
+
 ## Dependencies
 
-###   PySide2
+### PySide2
+
+[PySide2](https://wiki.qt.io/Qt_for_Python) is used for the GUI.
+
+You can install it by running
+
 ```
-pip install \
-    --index-url=http://download.qt.io/official_releases/QtForPython/ pyside2 \
-    --trusted-host download.qt.io
+pip2 install PySide2
 ```
