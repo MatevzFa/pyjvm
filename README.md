@@ -39,3 +39,5 @@ You can install it by running
 ```
 pip2 install PySide2
 ```
+
+**Note:** done by `pip` if following the [installation instructions](##Installation)
